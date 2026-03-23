@@ -51,11 +51,11 @@ export default function SearchBar({ variant = 'hero', initialValues }: SearchBar
   const [maxPrice, setMaxPrice] = useState(initialValues?.maxPrice || '');
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // Filter locations across all groups
+  // Filter locations - only show results when user types something
   const allFlat = allLocations.flatMap(g => g.locations.map(l => ({ ...l, group: g.label })));
-  const filtered = location
-    ? allFlat.filter(c => c.name.toLowerCase().includes(location.toLowerCase())).slice(0, 15)
-    : allFlat.filter(c => c.count >= 50).slice(0, 12); // Show top locations by default
+  const filtered = location.length >= 1
+    ? allFlat.filter(c => c.name.toLowerCase().includes(location.toLowerCase())).slice(0, 12)
+    : []; // Don't show anything until user starts typing
 
   const handleSearch = () => {
     const p = new URLSearchParams();
