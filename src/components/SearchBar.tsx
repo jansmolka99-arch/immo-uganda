@@ -16,13 +16,34 @@ interface SearchBarProps {
   };
 }
 
-const typeOptions = ['All types', 'Apartment', 'House', 'Villa', 'Land', 'Commercial', 'Studio'];
+const typeOptions = [
+  { label: 'All types', value: '' },
+  { label: '── Residential ──', value: '', disabled: true },
+  { label: 'Apartment', value: 'Apartment' },
+  { label: 'House', value: 'House' },
+  { label: 'Villa', value: 'Villa' },
+  { label: 'Studio', value: 'Studio' },
+  { label: 'Townhouse', value: 'Townhouse' },
+  { label: 'Bungalow', value: 'Bungalow' },
+  { label: 'Mansion', value: 'Mansion' },
+  { label: 'Duplex', value: 'Duplex' },
+  { label: '── Commercial ──', value: '', disabled: true },
+  { label: 'Office Space', value: 'Commercial' },
+  { label: 'Retail / Shop', value: 'Retail' },
+  { label: 'Warehouse', value: 'Warehouse' },
+  { label: 'Hotel / Lodge', value: 'Hotel' },
+  { label: '── Land ──', value: '', disabled: true },
+  { label: 'Residential Land', value: 'Land' },
+  { label: 'Commercial Land', value: 'CommercialLand' },
+  { label: 'Agricultural / Farmland', value: 'Farmland' },
+  { label: 'Industrial Land', value: 'IndustrialLand' },
+];
 
 export default function SearchBar({ variant = 'hero', initialValues }: SearchBarProps) {
   const router = useRouter();
   const [transaction, setTransaction] = useState(initialValues?.transaction || 'sale');
   const [location, setLocation] = useState(initialValues?.location || '');
-  const [propertyType, setPropertyType] = useState(initialValues?.type || 'All types');
+  const [propertyType, setPropertyType] = useState(initialValues?.type || '');
   const [minPrice, setMinPrice] = useState(initialValues?.minPrice || '');
   const [maxPrice, setMaxPrice] = useState(initialValues?.maxPrice || '');
   const [showDropdown, setShowDropdown] = useState(false);
@@ -33,7 +54,7 @@ export default function SearchBar({ variant = 'hero', initialValues }: SearchBar
     const p = new URLSearchParams();
     p.set('transaction', transaction);
     if (location) p.set('location', location);
-    if (propertyType !== 'All types') p.set('type', propertyType);
+    if (propertyType) p.set('type', propertyType);
     if (minPrice) p.set('minPrice', minPrice);
     if (maxPrice) p.set('maxPrice', maxPrice);
     router.push(`/search?${p.toString()}`);
@@ -80,7 +101,7 @@ export default function SearchBar({ variant = 'hero', initialValues }: SearchBar
           </div>
           <div style={{ position: 'relative' }}>
             <select value={propertyType} onChange={e => setPropertyType(e.target.value)} style={{ ...inputStyle, appearance: 'none' }}>
-              {typeOptions.map(t => <option key={t}>{t}</option>)}
+              {typeOptions.map((t, i) => <option key={`${t.value}-${i}`} value={t.value} disabled={t.disabled} style={t.disabled ? { fontWeight: 700, color: '#212529', fontSize: '11px' } : undefined}>{t.label}</option>)}
             </select>
             <ChevronDown size={14} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', color: '#CED4DA', pointerEvents: 'none' }} />
           </div>
@@ -166,7 +187,7 @@ export default function SearchBar({ variant = 'hero', initialValues }: SearchBar
           {/* Type */}
           <div style={{ position: 'relative', flex: '1 1 140px' }}>
             <select value={propertyType} onChange={e => setPropertyType(e.target.value)} style={{ ...inputStyle, appearance: 'none' }}>
-              {typeOptions.map(t => <option key={t}>{t}</option>)}
+              {typeOptions.map((t, i) => <option key={`${t.value}-${i}`} value={t.value} disabled={t.disabled} style={t.disabled ? { fontWeight: 700, color: '#212529', fontSize: '11px' } : undefined}>{t.label}</option>)}
             </select>
             <ChevronDown size={14} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#CED4DA', pointerEvents: 'none' }} />
           </div>

@@ -112,14 +112,14 @@ function SearchContent() {
           {/* Mobile filters overlay */}
           {showFilters && (
             <div className="lg:hidden" style={{ marginBottom: '16px' }}>
-              <SearchBar variant="compact" initialValues={{ transaction, location, type: type || 'All types', minPrice, maxPrice }} />
+              <SearchBar variant="compact" initialValues={{ transaction, location, type: type || '', minPrice, maxPrice }} />
             </div>
           )}
           <div style={{ display: 'flex', gap: '20px' }}>
             {/* Desktop sidebar */}
             <aside className="hidden lg:block" style={{ width: '260px', flexShrink: 0 }}>
               <div className="sticky" style={{ top: '76px' }}>
-                <SearchBar variant="compact" initialValues={{ transaction, location, type: type || 'All types', minPrice, maxPrice }} />
+                <SearchBar variant="compact" initialValues={{ transaction, location, type: type || '', minPrice, maxPrice }} />
                 <div style={{ marginTop: '16px', background: '#fff', borderRadius: '8px', border: '1px solid #E9ECEF', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
                   <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#212529', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <SlidersHorizontal size={14} /> More filters
