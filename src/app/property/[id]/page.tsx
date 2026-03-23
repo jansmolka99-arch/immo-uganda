@@ -3,11 +3,11 @@
 import { use, Suspense, lazy } from 'react';
 import Link from 'next/link';
 import {
-  ArrowLeft, Heart, Share2, MapPin, Bed, Bath, Maximize, Car,
+  Heart, Share2, MapPin, Bed, Bath, Maximize, Car,
   Calendar, Home, Zap, Phone, Mail, MessageCircle,
-  ChevronRight, Building, Check, Star, Shield
+  ChevronRight, Building, Check, Star, Shield, ArrowLeft
 } from 'lucide-react';
-import { properties, formatPrice } from '@/data/properties';
+import { properties, formatPrice, toUSD, sqmToAcres } from '@/data/properties';
 import PropertyCard from '@/components/PropertyCard';
 
 const MapView = lazy(() => import('@/components/MapView'));
@@ -18,235 +18,238 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
   if (!property) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <p className="text-[20px] font-bold text-immo-gray-900 mb-1">Property not found</p>
-          <Link href="/search" className="text-[14px] text-immo-blue font-medium hover:underline">Browse all properties</Link>
+      <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontSize: '20px', fontWeight: 700, color: '#212529', marginBottom: '8px' }}>Property not found</p>
+          <Link href="/search" style={{ fontSize: '14px', color: '#133DBD', fontWeight: 500 }}>Browse all properties</Link>
         </div>
       </div>
     );
   }
 
-  const similar = properties
-    .filter(p => p.id !== property.id && p.type === property.type && p.transaction === property.transaction)
-    .slice(0, 4);
-
   const p = property;
+  const similar = properties.filter(x => x.id !== p.id && x.type === p.type && x.transaction === p.transaction).slice(0, 4);
+  const showLand = p.specs.landArea && p.specs.landArea > 0;
 
   return (
-    <div className="bg-immo-gray-50 min-h-screen">
+    <div style={{ background: '#F8F9FA', minHeight: '100vh' }}>
       {/* Breadcrumb */}
-      <div className="bg-white border-b border-immo-gray-200">
-        <div className="max-w-[1280px] mx-auto px-4 lg:px-6 py-2.5 flex items-center gap-1.5 text-[12px] text-immo-gray-500 overflow-x-auto">
-          <Link href="/" className="hover:text-immo-blue shrink-0">Home</Link>
-          <ChevronRight size={12} className="shrink-0" />
-          <Link href={`/search?transaction=${p.transaction}`} className="hover:text-immo-blue shrink-0">For {p.transaction === 'sale' ? 'sale' : 'rent'}</Link>
-          <ChevronRight size={12} className="shrink-0" />
-          <Link href={`/search?transaction=${p.transaction}&location=${p.location.city}`} className="hover:text-immo-blue shrink-0">{p.location.city}</Link>
-          <ChevronRight size={12} className="shrink-0" />
-          <span className="text-immo-gray-700 font-medium truncate">{p.title}</span>
+      <div style={{ background: '#fff', borderBottom: '1px solid #E9ECEF' }}>
+        <div className="container" style={{ paddingTop: '10px', paddingBottom: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#ADB5BD', overflow: 'auto', whiteSpace: 'nowrap' }}>
+            <Link href="/" style={{ color: '#6C757D' }}>Home</Link>
+            <ChevronRight size={12} />
+            <Link href={`/search?transaction=${p.transaction}`} style={{ color: '#6C757D' }}>For {p.transaction}</Link>
+            <ChevronRight size={12} />
+            <Link href={`/search?transaction=${p.transaction}&location=${p.location.city}`} style={{ color: '#6C757D' }}>{p.location.city}</Link>
+            <ChevronRight size={12} />
+            <span style={{ color: '#212529', fontWeight: 500 }}>{p.title}</span>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-[1280px] mx-auto px-4 lg:px-6 py-6">
-        {/* Image gallery */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-6 rounded-lg overflow-hidden">
-          <div className="md:col-span-3 relative">
-            <img src={p.imageUrl} alt={p.title} className="w-full h-[300px] md:h-[420px] object-cover bg-immo-gray-100" />
-            <div className="absolute top-3 left-3 flex gap-1.5">
-              {p.isNew && <span className="px-2 py-0.5 bg-immo-green text-white text-[11px] font-semibold rounded uppercase">New</span>}
-              {p.featured && <span className="px-2 py-0.5 bg-immo-orange text-white text-[11px] font-semibold rounded uppercase">Spotlight</span>}
+      <div className="container" style={{ paddingTop: '20px', paddingBottom: '40px' }}>
+        {/* Top: Image + Sidebar */}
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+          {/* Left column */}
+          <div style={{ flex: '1 1 600px', minWidth: 0 }}>
+            {/* Main image */}
+            <div style={{ position: 'relative', borderRadius: '10px', overflow: 'hidden', marginBottom: '16px' }}>
+              <img
+                src={p.imageUrl}
+                alt={p.title}
+                style={{ width: '100%', aspectRatio: '16/10', objectFit: 'cover', display: 'block', background: '#F1F3F5' }}
+                loading="eager"
+              />
+              {(p.isNew || p.featured) && (
+                <div style={{ position: 'absolute', top: '12px', left: '12px', display: 'flex', gap: '6px' }}>
+                  {p.isNew && <span style={{ padding: '3px 8px', background: '#28A745', color: '#fff', fontSize: '11px', fontWeight: 600, borderRadius: '4px' }}>NEW</span>}
+                  {p.featured && <span style={{ padding: '3px 8px', background: '#FD7E14', color: '#fff', fontSize: '11px', fontWeight: 600, borderRadius: '4px' }}>SPOTLIGHT</span>}
+                </div>
+              )}
+              <Link href="/search" style={{ position: 'absolute', top: '12px', right: '12px', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.9)', borderRadius: '50%' }}>
+                <ArrowLeft size={18} color="#495057" />
+              </Link>
             </div>
-            <Link href="/search" className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center hover:bg-white transition-colors">
-              <ArrowLeft size={16} className="text-immo-gray-700" />
-            </Link>
-          </div>
-          <div className="hidden md:grid grid-rows-2 gap-2">
-            <img src={`https://picsum.photos/seed/immo${p.id + 50}/400/300`} alt="" className="w-full h-full object-cover bg-immo-gray-100" />
-            <div className="relative">
-              <img src={`https://picsum.photos/seed/immo${p.id + 80}/400/300`} alt="" className="w-full h-full object-cover bg-immo-gray-100" />
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-white text-[13px] font-semibold cursor-pointer hover:bg-black/50 transition-colors">
-                View all photos
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          {/* Main content */}
-          <div className="flex-1 min-w-0 space-y-5">
-            {/* Title & Price */}
-            <div className="bg-white rounded-lg border border-immo-gray-200 p-5" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
-                <div>
-                  <p className="text-[11px] font-medium text-immo-gray-500 uppercase tracking-wide mb-1">{p.type} · For {p.transaction}</p>
-                  <h1 className="text-[22px] font-bold text-immo-gray-900 mb-1.5">{p.title}</h1>
-                  <p className="flex items-center gap-1 text-[13px] text-immo-gray-600">
-                    <MapPin size={13} className="text-immo-gray-400" />
+            {/* Title + Price card */}
+            <Card>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', flexWrap: 'wrap' }}>
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontSize: '11px', fontWeight: 500, color: '#6C757D', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
+                    {p.type} &middot; For {p.transaction}
+                  </p>
+                  <h1 style={{ fontSize: 'clamp(18px, 3vw, 24px)', fontWeight: 700, color: '#212529', marginBottom: '6px', lineHeight: 1.3 }}>{p.title}</h1>
+                  <p style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px', color: '#6C757D' }}>
+                    <MapPin size={13} color="#ADB5BD" />
                     {p.location.address}, {p.location.district}, {p.location.city}
                   </p>
                 </div>
-                <div className="text-right shrink-0">
-                  <p className="text-[26px] font-bold text-immo-gray-900">{formatPrice(p.price)}</p>
-                  {p.transaction === 'rent' && <p className="text-[12px] text-immo-gray-500">per month</p>}
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <p style={{ fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 700, color: '#212529' }}>{formatPrice(p.price)}</p>
+                  <p style={{ fontSize: '13px', color: '#ADB5BD' }}>{toUSD(p.price)}{p.transaction === 'rent' ? ' /month' : ''}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 pt-3 border-t border-immo-gray-100">
-                <button className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-immo-gray-600 border border-immo-gray-200 rounded-md hover:bg-immo-gray-50 transition-colors">
-                  <Heart size={13} /> Save
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-immo-gray-600 border border-immo-gray-200 rounded-md hover:bg-immo-gray-50 transition-colors">
-                  <Share2 size={13} /> Share
-                </button>
-                <span className="ml-auto text-[11px] text-immo-gray-400">Ref: IU-{String(p.id).padStart(6, '0')}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #F1F3F5' }}>
+                <Btn icon={<Heart size={13} />} label="Save" />
+                <Btn icon={<Share2 size={13} />} label="Share" />
+                <span style={{ marginLeft: 'auto', fontSize: '11px', color: '#CED4DA' }}>Ref: IU-{String(p.id).padStart(6, '0')}</span>
               </div>
-            </div>
+            </Card>
 
-            {/* Key specs */}
-            <div className="bg-white rounded-lg border border-immo-gray-200 p-5" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-              <h2 className="text-[16px] font-bold text-immo-gray-900 mb-4">Key features</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {/* Key features */}
+            <Card title="Key features">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
                 {p.specs.bedrooms > 0 && <Spec icon={<Bed size={18} />} label="Bedrooms" value={String(p.specs.bedrooms)} />}
                 {p.specs.bathrooms > 0 && <Spec icon={<Bath size={18} />} label="Bathrooms" value={String(p.specs.bathrooms)} />}
                 {p.specs.area > 0 && <Spec icon={<Maximize size={18} />} label="Living area" value={`${p.specs.area} m²`} />}
-                {p.specs.landArea && p.specs.landArea > 0 && <Spec icon={<Home size={18} />} label="Land area" value={`${p.specs.landArea.toLocaleString()} m²`} />}
-                {p.specs.parking && p.specs.parking > 0 && <Spec icon={<Car size={18} />} label="Parking" value={`${p.specs.parking}`} />}
-                {p.specs.yearBuilt && <Spec icon={<Calendar size={18} />} label="Year built" value={String(p.specs.yearBuilt)} />}
+                {showLand && <Spec icon={<Home size={18} />} label="Land" value={sqmToAcres(p.specs.landArea!)} />}
+                {p.specs.parking && p.specs.parking > 0 && <Spec icon={<Car size={18} />} label="Parking" value={String(p.specs.parking)} />}
+                {p.specs.yearBuilt && <Spec icon={<Calendar size={18} />} label="Built" value={String(p.specs.yearBuilt)} />}
                 {p.specs.floors && <Spec icon={<Building size={18} />} label="Floors" value={String(p.specs.floors)} />}
-                {p.epc && <Spec icon={<Zap size={18} />} label="Energy class" value={p.epc} />}
+                {p.epc && <Spec icon={<Zap size={18} />} label="EPC" value={p.epc} />}
               </div>
-            </div>
+            </Card>
 
             {/* Description */}
-            <div className="bg-white rounded-lg border border-immo-gray-200 p-5" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-              <h2 className="text-[16px] font-bold text-immo-gray-900 mb-3">Description</h2>
-              <p className="text-[14px] text-immo-gray-700 leading-relaxed">{p.description}</p>
-            </div>
+            <Card title="Description">
+              <p style={{ fontSize: '14px', color: '#495057', lineHeight: 1.7 }}>{p.description}</p>
+            </Card>
 
             {/* Amenities */}
             {p.amenities.length > 0 && (
-              <div className="bg-white rounded-lg border border-immo-gray-200 p-5" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-                <h2 className="text-[16px] font-bold text-immo-gray-900 mb-3">Amenities</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <Card title="Amenities">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '8px' }}>
                   {p.amenities.map(a => (
-                    <div key={a} className="flex items-center gap-2 text-[13px] text-immo-gray-700">
-                      <Check size={14} className="text-immo-green shrink-0" /> {a}
+                    <div key={a} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#495057' }}>
+                      <Check size={14} color="#28A745" /> {a}
                     </div>
                   ))}
                 </div>
-              </div>
+              </Card>
             )}
 
             {/* EPC */}
             {p.epc && (
-              <div className="bg-white rounded-lg border border-immo-gray-200 p-5" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-                <h2 className="text-[16px] font-bold text-immo-gray-900 mb-3">Energy performance</h2>
-                <div className="space-y-1">
+              <Card title="Energy performance">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', maxWidth: '400px' }}>
                   {['A', 'B', 'C', 'D', 'E', 'F', 'G'].map((level, i) => {
                     const w = [30, 40, 50, 60, 70, 85, 100];
                     const c = ['#22c55e', '#84cc16', '#eab308', '#f59e0b', '#f97316', '#ef4444', '#b91c1c'];
                     const active = p.epc === level;
                     return (
-                      <div key={level} className="flex items-center gap-2">
-                        <div
-                          className="h-6 rounded-r-sm flex items-center justify-end pr-2 text-[11px] font-bold text-white"
-                          style={{ width: `${w[i]}%`, background: c[i], opacity: active ? 1 : 0.35, outline: active ? '2px solid #212529' : 'none', outlineOffset: '1px' }}
-                        >
+                      <div key={level} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{
+                          width: `${w[i]}%`, height: '24px', borderRadius: '0 4px 4px 0',
+                          display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: '8px',
+                          fontSize: '11px', fontWeight: 700, color: '#fff', background: c[i],
+                          opacity: active ? 1 : 0.3, outline: active ? '2px solid #212529' : 'none', outlineOffset: '1px',
+                        }}>
                           {level}
                         </div>
-                        {active && <span className="text-[11px] font-bold text-immo-gray-900">&larr; This property</span>}
+                        {active && <span style={{ fontSize: '11px', fontWeight: 700, color: '#212529' }}>&larr; This property</span>}
                       </div>
                     );
                   })}
                 </div>
-              </div>
+              </Card>
             )}
 
             {/* Map */}
-            <div className="bg-white rounded-lg border border-immo-gray-200 p-5" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-              <h2 className="text-[16px] font-bold text-immo-gray-900 mb-3">Location</h2>
-              <div className="h-[280px] rounded-lg overflow-hidden">
-                <Suspense fallback={<div className="w-full h-full bg-immo-gray-100 flex items-center justify-center text-[13px] text-immo-gray-500">Loading map...</div>}>
-                  <MapView
-                    properties={[property]}
-                    center={[p.location.lat, p.location.lng]}
-                    zoom={15}
-                    singleMarker
-                  />
+            <Card title="Location">
+              <div style={{ height: '260px', borderRadius: '8px', overflow: 'hidden', marginBottom: '8px' }}>
+                <Suspense fallback={<div style={{ width: '100%', height: '100%', background: '#F1F3F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#ADB5BD' }}>Loading map...</div>}>
+                  <MapView properties={[property]} center={[p.location.lat, p.location.lng]} zoom={15} singleMarker />
                 </Suspense>
               </div>
-              <p className="text-[13px] text-immo-gray-500 mt-2">{p.location.address}, {p.location.district}, {p.location.city}</p>
-            </div>
+              <p style={{ fontSize: '13px', color: '#6C757D' }}>{p.location.address}, {p.location.district}, {p.location.city}</p>
+            </Card>
           </div>
 
-          {/* Sidebar */}
-          <aside className="w-full lg:w-[300px] shrink-0 space-y-5">
-            {/* Contact */}
-            <div className="bg-white rounded-lg border border-immo-gray-200 p-5 sticky top-[76px]" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-              <div className="flex items-center gap-3 mb-4 pb-4 border-b border-immo-gray-100">
-                <div className="w-10 h-10 bg-immo-blue rounded-lg flex items-center justify-center text-white text-[13px] font-bold">
-                  {p.agency.logo}
+          {/* Right sidebar */}
+          <div style={{ width: '300px', flexShrink: 0 }} className="hidden lg:!block">
+            <div style={{ position: 'sticky', top: '76px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Contact */}
+              <Card>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid #F1F3F5' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: '#133DBD', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '13px', fontWeight: 700 }}>
+                    {p.agency.logo}
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '14px', fontWeight: 600, color: '#212529' }}>{p.agency.name}</p>
+                    <p style={{ fontSize: '11px', color: '#ADB5BD', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Star size={11} color="#F59E0B" fill="#F59E0B" /> 4.8 (127 reviews)
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[14px] font-semibold text-immo-gray-900">{p.agency.name}</p>
-                  <div className="flex items-center gap-1 text-[11px] text-immo-gray-500">
-                    <Star size={11} className="text-amber-400 fill-amber-400" />
-                    4.8 (127 reviews)
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <CtaBtn bg="#133DBD" color="#fff" icon={<Phone size={15} />} label="Request a call" />
+                  <CtaBtn bg="#fff" color="#212529" icon={<Mail size={15} />} label="Send a message" border />
+                  <CtaBtn bg="#25D366" color="#fff" icon={<MessageCircle size={15} />} label="WhatsApp" />
+                </div>
+                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #F1F3F5', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#133DBD', fontWeight: 500, padding: '4px 0' }}>Schedule a viewing</button>
+                  <button style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#133DBD', fontWeight: 500, padding: '4px 0' }}>Ask for the exact address</button>
+                </div>
+              </Card>
+
+              {/* Details */}
+              <Card>
+                <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#212529', marginBottom: '12px' }}>Property details</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <Row label="Reference" value={`IU-${String(p.id).padStart(6, '0')}`} />
+                  <Row label="Listed on" value={new Date(p.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} />
+                  <Row label="Type" value={p.type} />
+                  {p.specs.condition && <Row label="Condition" value={p.specs.condition} />}
+                  {p.specs.furnished !== undefined && <Row label="Furnished" value={p.specs.furnished ? 'Yes' : 'No'} />}
+                </div>
+              </Card>
+
+              {/* Safety */}
+              <div style={{ background: '#FFF8E1', borderRadius: '10px', border: '1px solid #FFE082', padding: '16px' }}>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <Shield size={18} color="#F57F17" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <div>
+                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#E65100', marginBottom: '6px' }}>Safety tips</p>
+                    <ul style={{ fontSize: '12px', color: '#795548', listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      <li>&bull; Never pay before visiting</li>
+                      <li>&bull; Verify agent credentials</li>
+                      <li>&bull; Check property documents</li>
+                      <li>&bull; Report suspicious listings</li>
+                    </ul>
                   </div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <button className="w-full flex items-center justify-center gap-2 py-2.5 bg-immo-blue text-white text-[13px] font-semibold rounded-lg hover:bg-immo-blue-dark transition-colors">
-                  <Phone size={15} /> Request a call
-                </button>
-                <button className="w-full flex items-center justify-center gap-2 py-2.5 bg-white text-immo-gray-900 text-[13px] font-semibold rounded-lg border border-immo-gray-200 hover:bg-immo-gray-50 transition-colors">
-                  <Mail size={15} /> Send a message
-                </button>
-                <button className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#25D366] text-white text-[13px] font-semibold rounded-lg hover:bg-[#20bd5a] transition-colors">
-                  <MessageCircle size={15} /> WhatsApp
-                </button>
-              </div>
-              <div className="mt-3 pt-3 border-t border-immo-gray-100 space-y-1">
-                <button className="w-full text-center text-[12px] text-immo-blue font-medium hover:underline">Schedule a viewing</button>
-                <button className="w-full text-center text-[12px] text-immo-blue font-medium hover:underline">Ask for the exact address</button>
-              </div>
             </div>
+          </div>
+        </div>
 
-            {/* Details */}
-            <div className="bg-white rounded-lg border border-immo-gray-200 p-5" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-              <h3 className="text-[13px] font-bold text-immo-gray-900 mb-3">Property details</h3>
-              <div className="space-y-2 text-[13px]">
-                <Row label="Reference" value={`IU-${String(p.id).padStart(6, '0')}`} />
-                <Row label="Listed on" value={new Date(p.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} />
-                <Row label="Type" value={p.type} />
-                {p.specs.condition && <Row label="Condition" value={p.specs.condition} />}
-                {p.specs.furnished !== undefined && <Row label="Furnished" value={p.specs.furnished ? 'Yes' : 'No'} />}
+        {/* Mobile contact bar - visible only on mobile */}
+        <div className="lg:hidden" style={{ marginTop: '16px' }}>
+          <Card>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '8px', background: '#133DBD', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '12px', fontWeight: 700 }}>
+                {p.agency.logo}
+              </div>
+              <div>
+                <p style={{ fontSize: '13px', fontWeight: 600, color: '#212529' }}>{p.agency.name}</p>
+                <p style={{ fontSize: '11px', color: '#ADB5BD' }}>
+                  <Star size={10} color="#F59E0B" fill="#F59E0B" /> 4.8 (127 reviews)
+                </p>
               </div>
             </div>
-
-            {/* Safety */}
-            <div className="bg-amber-50 rounded-lg border border-amber-200 p-4">
-              <div className="flex gap-2.5">
-                <Shield size={16} className="text-amber-600 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-[13px] font-semibold text-amber-900 mb-1">Safety tips</p>
-                  <ul className="text-[11px] text-amber-700 space-y-0.5">
-                    <li>&bull; Never pay before visiting</li>
-                    <li>&bull; Verify agent credentials</li>
-                    <li>&bull; Check property documents</li>
-                    <li>&bull; Report suspicious listings</li>
-                  </ul>
-                </div>
-              </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <CtaBtn bg="#133DBD" color="#fff" icon={<Phone size={14} />} label="Call" />
+              <CtaBtn bg="#25D366" color="#fff" icon={<MessageCircle size={14} />} label="WhatsApp" />
             </div>
-          </aside>
+          </Card>
         </div>
 
         {/* Similar */}
         {similar.length > 0 && (
-          <div className="mt-10">
-            <h2 className="text-[20px] font-bold text-immo-gray-900 mb-5">Similar properties</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div style={{ marginTop: '40px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#212529', marginBottom: '16px' }}>Similar properties</h2>
+            <div className="grid-cards">
               {similar.map(sp => <PropertyCard key={sp.id} property={sp} />)}
             </div>
           </div>
@@ -256,13 +259,22 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
   );
 }
 
+function Card({ title, children }: { title?: string; children: React.ReactNode }) {
+  return (
+    <div style={{ background: '#fff', borderRadius: '10px', border: '1px solid #E9ECEF', padding: '20px', marginBottom: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+      {title && <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#212529', marginBottom: '14px' }}>{title}</h2>}
+      {children}
+    </div>
+  );
+}
+
 function Spec({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-2.5 p-2.5 bg-immo-gray-50 rounded-md">
-      <span className="text-immo-blue">{icon}</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: '#F8F9FA', borderRadius: '8px' }}>
+      <span style={{ color: '#133DBD' }}>{icon}</span>
       <div>
-        <p className="text-[11px] text-immo-gray-500">{label}</p>
-        <p className="text-[13px] font-semibold text-immo-gray-900">{value}</p>
+        <p style={{ fontSize: '11px', color: '#ADB5BD' }}>{label}</p>
+        <p style={{ fontSize: '14px', fontWeight: 600, color: '#212529' }}>{value}</p>
       </div>
     </div>
   );
@@ -270,9 +282,29 @@ function Spec({ icon, label, value }: { icon: React.ReactNode; label: string; va
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between">
-      <span className="text-immo-gray-500">{label}</span>
-      <span className="font-medium text-immo-gray-900">{value}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+      <span style={{ color: '#6C757D' }}>{label}</span>
+      <span style={{ fontWeight: 500, color: '#212529' }}>{value}</span>
     </div>
+  );
+}
+
+function Btn({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <button style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '12px', fontWeight: 500, color: '#6C757D', border: '1px solid #E9ECEF', borderRadius: '6px', background: '#fff', cursor: 'pointer' }}>
+      {icon} {label}
+    </button>
+  );
+}
+
+function CtaBtn({ bg, color, icon, label, border }: { bg: string; color: string; icon: React.ReactNode; label: string; border?: boolean }) {
+  return (
+    <button style={{
+      width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+      padding: '10px', background: bg, color, fontSize: '13px', fontWeight: 600,
+      borderRadius: '8px', border: border ? '1px solid #E9ECEF' : 'none', cursor: 'pointer',
+    }}>
+      {icon} {label}
+    </button>
   );
 }
