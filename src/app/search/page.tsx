@@ -55,7 +55,7 @@ function SearchContent() {
     <div className="min-h-screen" style={{ background: '#F8F9FA' }}>
       {/* Header */}
       <div className="bg-white" style={{ borderBottom: '1px solid #E9ECEF' }}>
-        <div className="max-w-[1280px] mx-auto px-4 lg:px-6 py-3">
+        <div className="container" style={{ paddingTop: '12px', paddingBottom: '12px' }}>
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
             <div>
               <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#212529' }}>{title}</h1>
@@ -108,23 +108,29 @@ function SearchContent() {
           </div>
         </div>
       ) : (
-        <div className="max-w-[1280px] mx-auto px-4 lg:px-6 py-4">
-          <div className="flex gap-5">
-            {/* Sidebar */}
-            <aside className={`${showFilters ? 'block' : 'hidden'} lg:block w-full lg:w-[260px] shrink-0`}>
-              <div className="sticky top-[76px] space-y-4">
+        <div className="container" style={{ paddingTop: '16px', paddingBottom: '16px' }}>
+          {/* Mobile filters overlay */}
+          {showFilters && (
+            <div className="lg:hidden" style={{ marginBottom: '16px' }}>
+              <SearchBar variant="compact" initialValues={{ transaction, location, type: type || 'All types', minPrice, maxPrice }} />
+            </div>
+          )}
+          <div style={{ display: 'flex', gap: '20px' }}>
+            {/* Desktop sidebar */}
+            <aside className="hidden lg:block" style={{ width: '260px', flexShrink: 0 }}>
+              <div className="sticky" style={{ top: '76px' }}>
                 <SearchBar variant="compact" initialValues={{ transaction, location, type: type || 'All types', minPrice, maxPrice }} />
-                <div className="bg-white rounded-lg p-4" style={{ border: '1px solid #E9ECEF', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
-                  <h3 className="flex items-center gap-1.5 mb-3" style={{ fontSize: '13px', fontWeight: 700, color: '#212529' }}>
+                <div style={{ marginTop: '16px', background: '#fff', borderRadius: '8px', border: '1px solid #E9ECEF', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+                  <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#212529', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <SlidersHorizontal size={14} /> More filters
                   </h3>
                   <div>
-                    <label className="block mb-1.5" style={{ fontSize: '12px', fontWeight: 500, color: '#6C757D' }}>Bedrooms</label>
-                    <div className="flex gap-1">
+                    <label style={{ display: 'block', marginBottom: '6px', fontSize: '12px', fontWeight: 500, color: '#6C757D' }}>Bedrooms</label>
+                    <div style={{ display: 'flex', gap: '4px' }}>
                       {['', '1', '2', '3', '4', '5'].map(v => (
                         <button key={v} onClick={() => setBedroomsFilter(v)}
-                          className="flex-1 py-1.5 text-[12px] font-medium rounded transition-colors"
-                          style={{ background: bedroomsFilter === v ? '#133DBD' : '#F8F9FA', color: bedroomsFilter === v ? '#fff' : '#6C757D' }}>
+                          style={{ flex: 1, padding: '6px 0', fontSize: '12px', fontWeight: 500, borderRadius: '4px', border: 'none', cursor: 'pointer',
+                            background: bedroomsFilter === v ? '#133DBD' : '#F8F9FA', color: bedroomsFilter === v ? '#fff' : '#6C757D' }}>
                           {v || 'All'}{v ? '+' : ''}
                         </button>
                       ))}
@@ -134,18 +140,18 @@ function SearchContent() {
               </div>
             </aside>
             {/* Results */}
-            <div className="flex-1 min-w-0">
+            <div style={{ flex: 1, minWidth: 0 }}>
               {filtered.length === 0 ? (
-                <div className="text-center py-16">
+                <div style={{ textAlign: 'center', padding: '64px 0' }}>
                   <p style={{ fontSize: '16px', fontWeight: 600, color: '#212529' }}>No properties found</p>
                   <p style={{ fontSize: '13px', color: '#ADB5BD', marginTop: '4px' }}>Try adjusting your filters.</p>
                 </div>
               ) : viewMode === 'grid' ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div className="grid-results">
                   {filtered.map(p => <PropertyCard key={p.id} property={p} />)}
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {filtered.map(p => <ListCard key={p.id} property={p} />)}
                 </div>
               )}

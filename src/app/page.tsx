@@ -13,26 +13,26 @@ export default function HomePage() {
   return (
     <>
       {/* Search */}
-      <section style={{ background: '#fff', padding: '48px 0 40px' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#212529', marginBottom: '8px' }}>
+      <section style={{ background: '#fff', padding: '32px 0' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+            <h1 style={{ fontSize: 'clamp(24px, 5vw, 32px)', fontWeight: 700, color: '#212529', marginBottom: '6px' }}>
               Find your property in Uganda
             </h1>
-            <p style={{ fontSize: '15px', color: '#6C757D' }}>So many dreams, one address.</p>
+            <p style={{ fontSize: '14px', color: '#6C757D' }}>So many dreams, one address.</p>
           </div>
           <SearchBar variant="hero" />
         </div>
       </section>
 
       {/* Cities */}
-      <section style={{ background: '#F8F9FA', padding: '40px 0' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+      <section style={{ background: '#F8F9FA', padding: '32px 0' }}>
+        <div className="container">
           <SectionHeader title="Search by city for sale" href="/search?transaction=sale" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '8px' }}>
+          <div className="grid-cities">
             {cities.map(c => (
               <Link key={c.name} href={`/search?transaction=sale&location=${c.name}`}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: '#fff', borderRadius: '8px', border: '1px solid #DEE2E6', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: '#fff', borderRadius: '8px', border: '1px solid #DEE2E6' }}>
                 <span style={{ fontSize: '13px', fontWeight: 500, color: '#343A40' }}>{c.name}</span>
                 <span style={{ fontSize: '11px', color: '#ADB5BD' }}>{c.count}</span>
               </Link>
@@ -42,76 +42,66 @@ export default function HomePage() {
       </section>
 
       {/* Popular */}
-      <section style={{ background: '#fff', padding: '40px 0' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+      <section style={{ background: '#fff', padding: '32px 0' }}>
+        <div className="container">
           <SectionHeader title="Most popular properties" href="/search" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-            {popular.map(p => <PropertyCard key={p.id} property={p} />)}
-          </div>
+          <div className="grid-cards">{popular.map(p => <PropertyCard key={p.id} property={p} />)}</div>
         </div>
       </section>
 
-      {/* New Builds / Off-plan */}
-      <section style={{ background: '#133DBD', padding: '48px 0' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', gap: '40px', alignItems: 'center', flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 300px' }}>
-              <span style={{ display: 'inline-block', padding: '4px 12px', background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: '11px', fontWeight: 600, borderRadius: '20px', marginBottom: '16px', letterSpacing: '0.5px' }}>NEW BUILDS</span>
-              <h2 style={{ fontSize: '26px', fontWeight: 700, color: '#fff', marginBottom: '12px' }}>
-                New construction projects
-              </h2>
-              <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.7)', marginBottom: '20px', lineHeight: '1.6' }}>
-                Explore brand new developments across Uganda. From off-plan apartments in Kololo to housing estates in Kira &mdash; be the first to secure your unit.
+      {/* New Builds */}
+      <section style={{ background: '#133DBD', padding: '40px 0' }}>
+        <div className="container">
+          <div className="newbuilds-flex">
+            <div className="newbuilds-text">
+              <span style={{ display: 'inline-block', padding: '4px 12px', background: 'rgba(255,255,255,0.15)', color: '#fff', fontSize: '11px', fontWeight: 600, borderRadius: '20px', marginBottom: '12px' }}>NEW BUILDS</span>
+              <h2 style={{ fontSize: 'clamp(20px, 4vw, 26px)', fontWeight: 700, color: '#fff', marginBottom: '10px' }}>New construction projects</h2>
+              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.7)', marginBottom: '16px', lineHeight: '1.6' }}>
+                Explore brand new developments across Uganda. From off-plan apartments in Kololo to housing estates in Kira.
               </p>
-              <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
-                {[{ label: 'Planning Phase', color: '#FD7E14' }, { label: 'Under Construction', color: '#28A745' }, { label: 'Ready to Move', color: '#133DBD', bg: '#fff' }].map(s => (
-                  <span key={s.label} style={{ padding: '4px 10px', background: s.bg || 'rgba(255,255,255,0.15)', color: s.bg ? s.color : '#fff', fontSize: '11px', fontWeight: 600, borderRadius: '4px' }}>
-                    {s.label}
-                  </span>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+                {[{ l: 'Planning', c: '#FD7E14' }, { l: 'Under Construction', c: '#28A745' }, { l: 'Ready to Move', c: '#fff', t: '#133DBD' }].map(s => (
+                  <span key={s.l} style={{ padding: '3px 8px', background: s.t ? s.c : 'rgba(255,255,255,0.15)', color: s.t || '#fff', fontSize: '10px', fontWeight: 600, borderRadius: '4px' }}>{s.l}</span>
                 ))}
               </div>
-              <Link href="/search?new=true" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '10px 20px', background: '#fff', color: '#133DBD', fontSize: '14px', fontWeight: 600, borderRadius: '8px', textDecoration: 'none' }}>
-                Explore all new builds &rarr;
+              <Link href="/search?new=true" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '9px 18px', background: '#fff', color: '#133DBD', fontSize: '13px', fontWeight: 600, borderRadius: '8px' }}>
+                Explore all &rarr;
               </Link>
             </div>
-            <div style={{ flex: '2 1 500px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-              {newBuilds.map(p => <PropertyCard key={p.id} property={p} />)}
+            <div className="newbuilds-cards">
+              <div className="grid-cards-3">{newBuilds.map(p => <PropertyCard key={p.id} property={p} />)}</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Newest Sale */}
-      <section style={{ background: '#fff', padding: '40px 0' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+      <section style={{ background: '#fff', padding: '32px 0' }}>
+        <div className="container">
           <SectionHeader title="Newest properties for sale" href="/search?transaction=sale" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-            {saleNew.map(p => <PropertyCard key={p.id} property={p} />)}
-          </div>
+          <div className="grid-cards">{saleNew.map(p => <PropertyCard key={p.id} property={p} />)}</div>
         </div>
       </section>
 
-      {/* Alert Signup */}
+      {/* Alerts */}
       <AlertSignup />
 
       {/* Newest Rent */}
-      <section style={{ background: '#fff', padding: '40px 0' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+      <section style={{ background: '#fff', padding: '32px 0' }}>
+        <div className="container">
           <SectionHeader title="Newest properties for rent" href="/search?transaction=rent" />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-            {rentNew.map(p => <PropertyCard key={p.id} property={p} />)}
-          </div>
+          <div className="grid-cards">{rentNew.map(p => <PropertyCard key={p.id} property={p} />)}</div>
         </div>
       </section>
 
       {/* Property Types */}
-      <section style={{ background: '#F8F9FA', padding: '40px 0' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#212529', marginBottom: '20px' }}>Explore by property type</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px' }}>
+      <section style={{ background: '#F8F9FA', padding: '32px 0' }}>
+        <div className="container">
+          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#212529', marginBottom: '16px' }}>Explore by property type</h2>
+          <div className="grid-types">
             {propertyTypes.map(t => (
               <Link key={t.name} href={`/search?transaction=sale&type=${t.slug}`}
-                style={{ background: '#fff', borderRadius: '8px', border: '1px solid #DEE2E6', padding: '20px 12px', textAlign: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>
+                style={{ background: '#fff', borderRadius: '8px', border: '1px solid #DEE2E6', padding: '16px 10px', textAlign: 'center' }}>
                 <p style={{ fontSize: '14px', fontWeight: 600, color: '#343A40' }}>{t.name}</p>
                 <p style={{ fontSize: '12px', color: '#ADB5BD', marginTop: '4px' }}>{t.count} listings</p>
               </Link>
@@ -121,43 +111,40 @@ export default function HomePage() {
       </section>
 
       {/* CTA */}
-      <section style={{ background: '#fff', padding: '48px 0', borderTop: '1px solid #E9ECEF' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#212529', marginBottom: '8px' }}>Are you a property professional?</h2>
-          <p style={{ fontSize: '14px', color: '#6C757D', marginBottom: '24px', maxWidth: '480px', marginLeft: 'auto', marginRight: 'auto' }}>
+      <section style={{ background: '#fff', padding: '40px 0', borderTop: '1px solid #E9ECEF' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#212529', marginBottom: '8px' }}>Are you a property professional?</h2>
+          <p style={{ fontSize: '13px', color: '#6C757D', marginBottom: '20px', maxWidth: '440px', marginLeft: 'auto', marginRight: 'auto' }}>
             Join Uganda&apos;s leading real estate platform. List your properties and grow your business.
           </p>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-            <Link href="#" style={{ padding: '10px 24px', background: '#133DBD', color: '#fff', fontSize: '14px', fontWeight: 600, borderRadius: '8px' }}>List your property</Link>
-            <Link href="#" style={{ padding: '10px 24px', color: '#133DBD', fontSize: '14px', fontWeight: 600, borderRadius: '8px', border: '1.5px solid #133DBD' }}>Learn more</Link>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <Link href="#" style={{ padding: '10px 20px', background: '#133DBD', color: '#fff', fontSize: '13px', fontWeight: 600, borderRadius: '8px' }}>List your property</Link>
+            <Link href="#" style={{ padding: '10px 20px', color: '#133DBD', fontSize: '13px', fontWeight: 600, borderRadius: '8px', border: '1.5px solid #133DBD' }}>Learn more</Link>
           </div>
         </div>
       </section>
 
-      {/* SEO Text About Uganda */}
-      <section style={{ background: '#F8F9FA', padding: '40px 0', borderTop: '1px solid #E9ECEF' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#212529', marginBottom: '16px' }}>Real Estate in Uganda</h2>
-          <div style={{ columns: '2', columnGap: '40px', fontSize: '13px', color: '#6C757D', lineHeight: '1.8' }}>
-            <p style={{ marginBottom: '12px' }}>
+      {/* SEO */}
+      <section style={{ background: '#F8F9FA', padding: '32px 0', borderTop: '1px solid #E9ECEF' }}>
+        <div className="container">
+          <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#212529', marginBottom: '12px' }}>Real Estate in Uganda</h2>
+          <div className="seo-columns">
+            <p style={{ marginBottom: '10px' }}>
               Uganda, often referred to as the &ldquo;Pearl of Africa,&rdquo; is one of the most dynamic real estate markets in East Africa.
-              The capital city Kampala, home to over 3 million people, has seen tremendous growth in property development over the past two decades,
-              transforming into a modern hub for business and residential living.
+              Kampala, home to over 3 million people, has seen tremendous growth in property development over the past two decades.
             </p>
-            <p style={{ marginBottom: '12px' }}>
-              Premium neighborhoods like Kololo, Nakasero, and Muyenga feature luxury apartments and executive homes popular with diplomats
-              and expatriates. Growing suburbs such as Kira, Naalya, Ntinda, and Kisaasi offer more affordable housing options for young families
-              and professionals. Entebbe, located on Lake Victoria near the international airport, is known for its serene lakeside villas and cottages.
+            <p style={{ marginBottom: '10px' }}>
+              Premium neighborhoods like Kololo, Nakasero, and Muyenga feature luxury apartments popular with diplomats
+              and expatriates. Growing suburbs like Kira, Naalya, and Kisaasi offer affordable options for families.
+              Entebbe is known for serene lakeside villas.
             </p>
-            <p style={{ marginBottom: '12px' }}>
-              Uganda&apos;s real estate market presents strong investment opportunities, with property values steadily appreciating across major cities.
-              Land ownership follows a dual system of freehold (private mailo) and leasehold titles. Prices are typically quoted in Ugandan Shillings (UGX)
-              or US Dollars, and land is measured in decimals (1 acre = 100 decimals) or acres.
+            <p style={{ marginBottom: '10px' }}>
+              Land ownership follows freehold (private mailo) and leasehold titles. Prices are quoted in UGX or USD.
+              Land is measured in decimals (1 acre = 100 decimals) or acres.
             </p>
             <p>
-              Whether you&apos;re looking for a family home in Kampala, investment land in Wakiso, a holiday villa in the Ssese Islands,
-              or commercial space in the central business district &mdash; ImmoUganda connects you with verified listings and trusted agencies
-              across the Pearl of Africa.
+              Whether you&apos;re looking for a family home, investment land, a holiday villa in the Ssese Islands,
+              or commercial space &mdash; ImmoUganda connects you with verified listings across the Pearl of Africa.
             </p>
           </div>
         </div>
@@ -168,8 +155,8 @@ export default function HomePage() {
 
 function SectionHeader({ title, href }: { title: string; href?: string }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-      <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#212529' }}>{title}</h2>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+      <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#212529' }}>{title}</h2>
       {href && <Link href={href} style={{ fontSize: '13px', fontWeight: 600, color: '#133DBD' }}>View all &rarr;</Link>}
     </div>
   );
