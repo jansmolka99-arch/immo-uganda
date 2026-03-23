@@ -417,6 +417,9 @@ export const propertyTypes = [
   { name: 'Studios', slug: 'Studio', count: 189 },
 ];
 
+// Exchange rate: 1 USD ≈ 3,750 UGX
+const UGX_TO_USD = 3750;
+
 export function formatPrice(price: number): string {
   return `UGX ${price.toLocaleString('en-US')}`;
 }
@@ -429,4 +432,22 @@ export function formatPriceShort(price: number): string {
     return `UGX ${(price / 1000000).toFixed(0)}M`;
   }
   return `UGX ${price.toLocaleString('en-US')}`;
+}
+
+export function toUSD(ugx: number): string {
+  const usd = ugx / UGX_TO_USD;
+  if (usd >= 1000000) return `$${(usd / 1000000).toFixed(1)}M`;
+  if (usd >= 1000) return `$${(usd / 1000).toFixed(0)}K`;
+  return `$${usd.toFixed(0)}`;
+}
+
+export function sqmToAcres(sqm: number): string {
+  const acres = sqm / 4046.86;
+  if (acres >= 1) return `${acres.toFixed(1)} acres`;
+  const decimals = acres * 100;
+  return `${decimals.toFixed(0)} decimals`;
+}
+
+export function sqmToDecimals(sqm: number): number {
+  return Math.round((sqm / 4046.86) * 100);
 }
