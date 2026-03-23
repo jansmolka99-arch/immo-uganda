@@ -157,12 +157,32 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
 
             {/* Map */}
             <Card title="Location">
-              <div style={{ height: '260px', borderRadius: '8px', overflow: 'hidden', marginBottom: '8px' }}>
+              <div style={{ height: '280px', borderRadius: '8px', overflow: 'hidden', marginBottom: '12px' }}>
                 <Suspense fallback={<div style={{ width: '100%', height: '100%', background: '#F1F3F5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', color: '#ADB5BD' }}>Loading map...</div>}>
                   <MapView properties={[property]} center={[p.location.lat, p.location.lng]} zoom={15} singleMarker />
                 </Suspense>
               </div>
-              <p style={{ fontSize: '13px', color: '#6C757D' }}>{p.location.address}, {p.location.district}, {p.location.city}</p>
+              {/* Address with Google Maps link */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '12px', background: '#F8F9FA', borderRadius: '8px' }}>
+                <MapPin size={16} color="#133DBD" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div>
+                  <p style={{ fontSize: '14px', fontWeight: 600, color: '#212529', marginBottom: '4px' }}>
+                    {p.location.address}, {p.location.district}
+                  </p>
+                  <p style={{ fontSize: '13px', color: '#6C757D', marginBottom: '8px' }}>
+                    {p.location.city}, Uganda
+                  </p>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${p.location.lat},${p.location.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#133DBD' }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Open in Google Maps
+                  </a>
+                </div>
+              </div>
             </Card>
           </div>
 
@@ -200,6 +220,7 @@ export default function PropertyDetailPage({ params }: { params: Promise<{ id: s
                   <Row label="Reference" value={`IU-${String(p.id).padStart(6, '0')}`} />
                   <Row label="Listed on" value={new Date(p.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} />
                   <Row label="Type" value={p.type} />
+                  {p.tenure && <Row label="Land tenure" value={p.tenure} />}
                   {p.specs.condition && <Row label="Condition" value={p.specs.condition} />}
                   {p.specs.furnished !== undefined && <Row label="Furnished" value={p.specs.furnished ? 'Yes' : 'No'} />}
                 </div>
