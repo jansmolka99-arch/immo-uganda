@@ -20,7 +20,10 @@ export default function SearchPage() {
 function SearchContent() {
   const searchParams = useSearchParams();
   const [sortBy, setSortBy] = useState('newest');
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid');
+  const initialView = searchParams.get('view');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>(
+    initialView === 'map' ? 'map' : initialView === 'list' ? 'list' : 'grid'
+  );
   const [showFilters, setShowFilters] = useState(false);
   const [bedroomsFilter, setBedroomsFilter] = useState('');
 
