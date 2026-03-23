@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Search, MapPin, ChevronDown } from 'lucide-react';
-import { cities } from '@/data/properties';
+import { allLocations } from '@/data/properties';
 
 interface SearchBarProps {
   variant?: 'hero' | 'compact';
@@ -51,7 +51,11 @@ export default function SearchBar({ variant = 'hero', initialValues }: SearchBar
   const [maxPrice, setMaxPrice] = useState(initialValues?.maxPrice || '');
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const filtered = location ? cities.filter(c => c.name.toLowerCase().includes(location.toLowerCase())) : cities;
+  // Filter locations across all groups
+  const allFlat = allLocations.flatMap(g => g.locations.map(l => ({ ...l, group: g.label })));
+  const filtered = location
+    ? allFlat.filter(c => c.name.toLowerCase().includes(location.toLowerCase())).slice(0, 15)
+    : allFlat.filter(c => c.count >= 50).slice(0, 12); // Show top locations by default
 
   const handleSearch = () => {
     const p = new URLSearchParams();
@@ -93,12 +97,7 @@ export default function SearchBar({ variant = 'hero', initialValues }: SearchBar
             />
             {showDropdown && filtered.length > 0 && (
               <div className="autocomplete-list">
-                {filtered.map(c => (
-                  <div key={c.name} className="autocomplete-item" style={{ display: 'flex', justifyContent: 'space-between' }} onMouseDown={() => { setLocation(c.name); setShowDropdown(false); }}>
-                    <span style={{ color: '#495057' }}>{c.name}</span>
-                    <span style={{ fontSize: '11px', color: '#CED4DA' }}>{c.count}</span>
-                  </div>
-                ))}
+                <LocationDropdown items={filtered} onSelect={name => { setLocation(name); setShowDropdown(false); }} />
               </div>
             )}
           </div>
@@ -174,16 +173,7 @@ export default function SearchBar({ variant = 'hero', initialValues }: SearchBar
             />
             {showDropdown && filtered.length > 0 && (
               <div className="autocomplete-list">
-                {filtered.map(c => (
-                  <div key={c.name} className="autocomplete-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-                    onMouseDown={() => { setLocation(c.name); setShowDropdown(false); }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <MapPin size={13} color="#CED4DA" />
-                      <span style={{ fontSize: '14px', color: '#495057', fontWeight: 500 }}>{c.name}</span>
-                    </div>
-                    <span style={{ fontSize: '12px', color: '#CED4DA' }}>{c.count} properties</span>
-                  </div>
-                ))}
+                <LocationDropdown items={filtered} onSelect={name => { setLocation(name); setShowDropdown(false); }} showIcon />
               </div>
             )}
           </div>
@@ -213,5 +203,36 @@ export default function SearchBar({ variant = 'hero', initialValues }: SearchBar
         </div>
       </div>
     </div>
+  );
+}
+
+function LocationDropdown({ items, onSelect, showIcon }: { items: { name: string; count: number; group: string }[]; onSelect: (name: string) => void; showIcon?: boolean }) {
+  // Group by region
+  const grouped: Record<string, { name: string; count: number }[]> = {};
+  items.forEach(item => {
+    if (!grouped[item.group]) grouped[item.group] = [];
+    grouped[item.group].push(item);
+  });
+
+  return (
+    <>
+      {Object.entries(grouped).map(([group, locs]) => (
+        <div key={group}>
+          <div style={{ padding: '6px 16px', fontSize: '10px', fontWeight: 700, color: '#ADB5BD', textTransform: 'uppercase', letterSpacing: '0.5px', background: '#F8F9FA' }}>
+            {group}
+          </div>
+          {locs.map(c => (
+            <div key={c.name} className="autocomplete-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+              onMouseDown={() => onSelect(c.name)}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {showIcon && <MapPin size={13} color="#CED4DA" />}
+                <span style={{ fontSize: '13px', color: '#495057', fontWeight: 500 }}>{c.name}</span>
+              </div>
+              <span style={{ fontSize: '11px', color: '#CED4DA' }}>{c.count}</span>
+            </div>
+          ))}
+        </div>
+      ))}
+    </>
   );
 }

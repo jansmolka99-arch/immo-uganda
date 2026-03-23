@@ -2,7 +2,7 @@ import Link from 'next/link';
 import SearchBar from '@/components/SearchBar';
 import PropertyCard from '@/components/PropertyCard';
 import AlertSignup from '@/components/AlertSignup';
-import { properties, cities, propertyTypes } from '@/data/properties';
+import { properties, topCities, propertyTypes } from '@/data/properties';
 
 export default function HomePage() {
   const popular = properties.filter(p => p.featured).slice(0, 4);
@@ -30,7 +30,7 @@ export default function HomePage() {
         <div className="container">
           <SectionHeader title="Search by city for sale" href="/search?transaction=sale" />
           <div className="grid-cities">
-            {cities.map(c => (
+            {topCities.map(c => (
               <Link key={c.name} href={`/search?transaction=sale&location=${c.name}`}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: '#fff', borderRadius: '8px', border: '1px solid #DEE2E6' }}>
                 <span style={{ fontSize: '13px', fontWeight: 500, color: '#343A40' }}>{c.name}</span>
